@@ -54,7 +54,6 @@
         <option value="end_of_turn">End of turn</option>
         <option value="start_of_turn">Start of turn</option>
       </select>
-      <label class="check"><input v-model="editor.concentration" type="checkbox" /> Concentration</label>
       <button class="btn btn-primary" @click="saveEditor">Save</button>
       <button class="btn" @click="editorOpen = false">Cancel</button>
     </div>
@@ -73,7 +72,6 @@ const emit = defineEmits<{
       durationType: DurationType;
       durationRemaining?: number;
       endsOn?: ConditionEndPhase;
-      concentration?: boolean;
     }
   ];
   remove: [conditionId: string];
@@ -84,7 +82,6 @@ const emit = defineEmits<{
       durationType?: DurationType;
       durationRemaining?: number;
       endsOn?: ConditionEndPhase;
-      concentration?: boolean;
     }
   ];
 }>();
@@ -116,13 +113,11 @@ const editor = ref<{
   durationType: DurationType;
   durationRemaining: number;
   endsOn: ConditionEndPhase;
-  concentration: boolean;
 }>({
   name: "",
   durationType: "hours",
   durationRemaining: 1,
-  endsOn: "end_of_turn",
-  concentration: false
+  endsOn: "end_of_turn"
 });
 
 function hasCondition(name: string): boolean {
@@ -143,8 +138,7 @@ function togglePreset(name: string) {
   emit("add", {
     name,
     durationType: "hours",
-    durationRemaining: 1,
-    concentration: false
+    durationRemaining: 1
   });
 }
 
@@ -157,8 +151,7 @@ function openEditorByName(name: string) {
   openEditor({
     name,
     durationType: "hours",
-    durationRemaining: 1,
-    concentration: false
+    durationRemaining: 1
   });
 }
 
@@ -169,8 +162,7 @@ function openEditor(
         name: string;
         durationType: DurationType;
         durationRemaining?: number;
-        concentration?: boolean;
-      }
+    }
 ) {
   suppressClickUntil.value = Date.now() + 250;
   editor.value = {
@@ -178,8 +170,7 @@ function openEditor(
     name: condition?.name ?? "",
     durationType: condition?.durationType ?? "hours",
     durationRemaining: condition?.durationRemaining ?? 1,
-    endsOn: condition?.endsOn ?? "end_of_turn",
-    concentration: condition?.concentration ?? false
+    endsOn: condition?.endsOn ?? "end_of_turn"
   };
   editorOpen.value = true;
 }
@@ -195,8 +186,7 @@ function saveEditor() {
       editor.value.durationType === "until_discarded"
         ? undefined
         : Math.max(1, Number(editor.value.durationRemaining || 1)),
-    endsOn: editor.value.durationType === "rounds" ? editor.value.endsOn : undefined,
-    concentration: editor.value.concentration
+    endsOn: editor.value.durationType === "rounds" ? editor.value.endsOn : undefined
   };
 
   if (editor.value.conditionId) emit("update", editor.value.conditionId, payload);

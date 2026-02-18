@@ -286,6 +286,7 @@ export const useEncounterStore = defineStore("encounter", () => {
       tags: input.tags ?? [],
       isExpanded: input.isExpanded ?? false,
       isHidden: input.isHidden ?? false,
+      isConcentrating: input.isConcentrating ?? false,
       publicNotes: input.publicNotes,
       gmNotes: input.gmNotes,
       deathSaves: input.deathSaves,
@@ -409,6 +410,7 @@ export const useEncounterStore = defineStore("encounter", () => {
     const active = ordered[nextIndex];
     if (active) await tickRoundConditions(active.id, "start_of_turn");
 
+    await collapseInactiveCombatants(encounterId, active?.id);
     await persistEncounter(encounter);
     await addLog(encounterId, "next_turn", { turnIndex: encounter.turnIndex, round: encounter.round }, active?.id);
   }
@@ -428,6 +430,7 @@ export const useEncounterStore = defineStore("encounter", () => {
     encounter.turnIndex = nextIndex;
     await persistEncounter(encounter);
     const active = ordered[nextIndex];
+    await collapseInactiveCombatants(encounterId, active?.id);
     await addLog(encounterId, "prev_turn", { turnIndex: encounter.turnIndex, round: encounter.round }, active?.id);
   }
 
@@ -509,13 +512,10 @@ export const useEncounterStore = defineStore("encounter", () => {
   async function breakConcentration(combatantId: string) {
     const combatant = combatants.value.find((c) => c.id === combatantId);
     if (!combatant) return;
-    const selected = conditions.value.filter((c) => c.combatantId === combatantId && c.concentration);
-    if (!selected.length) return;
+    if (!combatant.isConcentrating) return;
     await recordUndo(combatant.encounterId);
-    const ids = selected.map((c) => c.id);
-    conditions.value = conditions.value.filter((c) => !ids.includes(c.id));
-    await db.conditions.bulkDelete(ids);
-    await addLog(combatant.encounterId, "break_concentration", { removed: ids.length }, combatantId);
+    await updateCombatant(combatantId, { isConcentrating: false });
+    await addLog(combatant.encounterId, "break_concentration", { removed: 0 }, combatantId);
   }
 
   async function modifySlot(combatantId: string, level: number, delta: 1 | -1) {
@@ -545,6 +545,29 @@ export const useEncounterStore = defineStore("encounter", () => {
     const combatant = combatants.value.find((c) => c.id === combatantId);
     if (!combatant) return;
     await updateCombatant(combatantId, { isExpanded: !combatant.isExpanded });
+  }
+
+  async function collapseInactiveCombatants(encounterId: string, activeCombatantId?: string) {
+    if (!activeCombatantId) return;
+    const changed: Combatant[] = [];
+    const updated = combatants.value.map((combatant) => {
+      if (combatant.encounterId !== encounterId) return combatant;
+      if (combatant.id === activeCombatantId) {
+        if (combatant.isExpanded) return combatant;
+        const next = { ...combatant, isExpanded: true };
+        changed.push(next);
+        return next;
+      }
+      if (!combatant.isExpanded) return combatant;
+      const next = { ...combatant, isExpanded: false };
+      changed.push(next);
+      return next;
+    });
+    if (!changed.length) return;
+    combatants.value = updated;
+    await db.transaction("rw", db.combatants, async () => {
+      await db.combatants.bulkPut(changed);
+    });
   }
 
   async function toggleSpellsVisible(combatantId: string) {

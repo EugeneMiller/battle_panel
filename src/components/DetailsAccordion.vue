@@ -1,9 +1,9 @@
 <template>
   <section class="details-panel">
-    <button class="btn" @click="$emit('toggle')">
-      {{ combatant.isExpanded ? "Hide details" : "Show details" }}
+    <button class="btn" @click="toggle">
+      {{ isOpen ? "Hide details" : "Show details" }}
     </button>
-    <div v-if="combatant.isExpanded" class="details-grid">
+    <div v-if="isOpen" class="details-grid">
       <div><strong>Speed:</strong> {{ combatant.speed || "-" }}</div>
       <div><strong>Tags:</strong> {{ combatant.tags?.join(", ") || "-" }}</div>
       <div>
@@ -56,10 +56,11 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
 import type { AttackEntry, Combatant } from "../models/types";
 
 defineProps<{ combatant: Combatant }>();
-defineEmits<{ toggle: [] }>();
+const isOpen = ref(false);
 
 function formatAbility(score: number): string {
   const modifier = Math.floor((score - 10) / 2);
@@ -68,6 +69,10 @@ function formatAbility(score: number): string {
 
 function formatModifier(modifier: number): string {
   return modifier >= 0 ? `+${modifier}` : String(modifier);
+}
+
+function toggle() {
+  isOpen.value = !isOpen.value;
 }
 
 function formatDamage(attack: AttackEntry): string {

@@ -10,6 +10,29 @@
       @clear="store.clearEncounterState(encounter.id)"
     />
 
+    <div class="card-list">
+      <CombatantCard
+        v-for="combatant in combatants"
+        :key="combatant.id"
+        :combatant="combatant"
+        :conditions="store.getConditionsForCombatant(combatant.id)"
+        :active="combatant.id === activeCombatant?.id"
+        @initiative-change="store.updateCombatant(combatant.id, { initiative: $event })"
+        @damage="store.applyDamage(combatant.id, $event)"
+        @heal="store.heal(combatant.id, $event)"
+        @set-hp="store.setHp(combatant.id, $event)"
+        @add-condition="store.addCondition(combatant.id, $event)"
+        @remove-condition="store.removeCondition($event)"
+        @update-condition="(conditionId, patch) => store.updateCondition(conditionId, patch)"
+        @break-concentration="store.breakConcentration(combatant.id)"
+        @set-concentration="store.updateCombatant(combatant.id, { isConcentrating: $event })"
+        @slot-mod="(level, delta) => store.modifySlot(combatant.id, level, delta)"
+        @toggle-spells="store.toggleSpellsVisible(combatant.id)"
+        @toggle-expanded="store.toggleCombatantExpanded(combatant.id)"
+        @remove="removeCombatant(combatant.id)"
+      />
+    </div>
+
     <section class="add-form">
       <h3>Add combatant</h3>
       <div class="row wrap">
@@ -36,28 +59,6 @@
       @export-encounter="download(store.exportAsJson(encounter.id), `${encounter.name}.json`)"
       @import="onImport"
     />
-
-    <div class="card-list">
-      <CombatantCard
-        v-for="combatant in combatants"
-        :key="combatant.id"
-        :combatant="combatant"
-        :conditions="store.getConditionsForCombatant(combatant.id)"
-        :active="combatant.id === activeCombatant?.id"
-        @initiative-change="store.updateCombatant(combatant.id, { initiative: $event })"
-        @damage="store.applyDamage(combatant.id, $event)"
-        @heal="store.heal(combatant.id, $event)"
-        @set-hp="store.setHp(combatant.id, $event)"
-        @add-condition="store.addCondition(combatant.id, $event)"
-        @remove-condition="store.removeCondition($event)"
-        @update-condition="(conditionId, patch) => store.updateCondition(conditionId, patch)"
-        @break-concentration="store.breakConcentration(combatant.id)"
-        @slot-mod="(level, delta) => store.modifySlot(combatant.id, level, delta)"
-        @toggle-spells="store.toggleSpellsVisible(combatant.id)"
-        @toggle-details="store.toggleCombatantExpanded(combatant.id)"
-        @remove="removeCombatant(combatant.id)"
-      />
-    </div>
 
     <CombatLog :entries="store.logsForEncounter(encounter.id)" :combatants="combatants" />
   </section>

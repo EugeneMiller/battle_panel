@@ -120,6 +120,7 @@ export interface Combatant {
   tags?: string[];
   isExpanded: boolean;
   isHidden: boolean;
+  isConcentrating: boolean;
   publicNotes?: string;
   gmNotes?: string;
   attacks?: AttackEntry[];
@@ -136,7 +137,6 @@ export interface ConditionInstance {
   durationType: DurationType;
   durationRemaining?: number;
   endsOn?: ConditionEndPhase;
-  concentration?: boolean;
   notes?: string;
   createdAt: number;
 }
