@@ -244,6 +244,35 @@ textarea {
   padding-left: 18px;
 }
 
+.attack-multi {
+  margin: 6px 0 4px;
+}
+
+.attack-table {
+  width: 100%;
+  margin-top: 6px;
+  border-collapse: collapse;
+}
+
+.attack-table th,
+.attack-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.attack-table th {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.attack-notes {
+  margin-top: 2px;
+  font-size: 0.9rem;
+}
+
 @media (max-width: 860px) {
   .app-main {
     padding: 10px;

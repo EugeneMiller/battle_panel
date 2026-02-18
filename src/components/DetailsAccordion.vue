@@ -9,26 +9,38 @@
       <div>
         <strong>Abilities:</strong>
         <span v-if="combatant.abilities">
-          STR {{ formatMod(combatant.abilities.str) }} DEX {{ formatMod(combatant.abilities.dex) }}
-          CON {{ formatMod(combatant.abilities.con) }} INT {{ formatMod(combatant.abilities.int) }}
-          WIS {{ formatMod(combatant.abilities.wis) }} CHA {{ formatMod(combatant.abilities.cha) }}
+          STR {{ formatAbility(combatant.abilities.str) }} DEX {{ formatAbility(combatant.abilities.dex) }}
+          CON {{ formatAbility(combatant.abilities.con) }} INT {{ formatAbility(combatant.abilities.int) }}
+          WIS {{ formatAbility(combatant.abilities.wis) }} CHA {{ formatAbility(combatant.abilities.cha) }}
         </span>
         <span v-else>-</span>
       </div>
       <div>
         <strong>Attacks:</strong>
-        <ul v-if="combatant.attacks?.length" class="attack-list">
-          <li v-for="attack in combatant.attacks" :key="attack.id">
-            {{ attack.name }}
-            <span v-if="typeof attack.attacksCount === 'number' && attack.attacksCount > 1">
-              (x{{ attack.attacksCount }})
-            </span>
-            <span v-if="typeof attack.toHit === 'number'"> | to hit {{ formatMod(attack.toHit) }}</span>
-            <span v-if="attack.damage"> | dmg {{ attack.damage }}</span>
-            <span v-if="attack.damageType"> {{ attack.damageType }}</span>
-            <span v-if="attack.notes"> | {{ attack.notes }}</span>
-          </li>
-        </ul>
+        <div v-if="combatant.attacks?.length">
+          <div v-if="getMultiattackCount(combatant.attacks)" class="attack-multi muted">
+            Multiattack: x{{ getMultiattackCount(combatant.attacks) }}
+          </div>
+          <table class="attack-table">
+            <thead>
+              <tr>
+                <th>Attack</th>
+                <th>Bonus</th>
+                <th>Damage</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="attack in combatant.attacks" :key="attack.id">
+                <td>
+                  <div>{{ attack.name }}</div>
+                  <div v-if="attack.notes" class="muted attack-notes">{{ attack.notes }}</div>
+                </td>
+                <td>{{ typeof attack.toHit === "number" ? formatModifier(attack.toHit) : "-" }}</td>
+                <td>{{ formatDamage(attack) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <span v-else>-</span>
       </div>
       <div><strong>Public notes:</strong> {{ combatant.publicNotes || "-" }}</div>
@@ -44,14 +56,31 @@
 </template>
 
 <script setup lang="ts">
-import type { Combatant } from "../models/types";
+import type { AttackEntry, Combatant } from "../models/types";
 
 defineProps<{ combatant: Combatant }>();
 defineEmits<{ toggle: [] }>();
 
-function formatMod(scoreOrMod: number): string {
-  const maybeScore = Number(scoreOrMod);
-  const modifier = maybeScore >= 1 && maybeScore <= 30 ? Math.floor((maybeScore - 10) / 2) : maybeScore;
+function formatAbility(score: number): string {
+  const modifier = Math.floor((score - 10) / 2);
   return modifier >= 0 ? `+${modifier}` : String(modifier);
+}
+
+function formatModifier(modifier: number): string {
+  return modifier >= 0 ? `+${modifier}` : String(modifier);
+}
+
+function formatDamage(attack: AttackEntry): string {
+  if (!attack.damage) return "-";
+  return attack.damageType ? `${attack.damage} ${attack.damageType}` : attack.damage;
+}
+
+function getMultiattackCount(attacks?: AttackEntry[]): number | null {
+  if (!attacks?.length) return null;
+  const total = attacks.reduce((sum, attack) => {
+    if (typeof attack.attacksCount !== "number") return sum;
+    return sum + attack.attacksCount;
+  }, 0);
+  return total > 1 ? total : null;
 }
 </script>
