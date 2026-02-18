@@ -290,6 +290,7 @@ export const useEncounterStore = defineStore("encounter", () => {
       publicNotes: input.publicNotes,
       gmNotes: input.gmNotes,
       deathSaves: input.deathSaves,
+      multiattackCount: input.multiattackCount,
       spellcasting: input.spellcasting
     };
     combatants.value.push(combatant);

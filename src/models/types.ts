@@ -124,6 +124,7 @@ export interface Combatant {
   publicNotes?: string;
   gmNotes?: string;
   attacks?: AttackEntry[];
+  multiattackCount?: number;
   deathSaves?: DeathSaves;
   spellcasting?: SpellcastingBlock;
 }

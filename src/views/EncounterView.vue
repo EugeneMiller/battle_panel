@@ -28,6 +28,7 @@
         @slot-mod="(level, delta) => store.modifySlot(combatant.id, level, delta)"
         @toggle-spells="store.toggleSpellsVisible(combatant.id)"
         @toggle-expanded="store.toggleCombatantExpanded(combatant.id)"
+        @update-combatant="store.updateCombatant(combatant.id, $event)"
         @remove="removeCombatant(combatant.id)"
       />
     </div>
