@@ -8,7 +8,6 @@
       <button class="btn" @click="$emit('prev')">Prev turn</button>
       <button class="btn btn-primary" @click="$emit('next')">Next turn</button>
       <button class="btn" @click="$emit('sort')">Sort by initiative</button>
-      <button class="btn" @click="$emit('undo')">Undo</button>
       <button class="btn btn-danger" @click="$emit('clear')">Clear state</button>
     </div>
   </section>
@@ -26,7 +25,6 @@ defineEmits<{
   prev: [];
   next: [];
   sort: [];
-  undo: [];
   clear: [];
 }>();
 </script>

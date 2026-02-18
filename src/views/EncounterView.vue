@@ -6,7 +6,6 @@
       @next="store.nextTurn(encounter.id)"
       @prev="store.prevTurn(encounter.id)"
       @sort="store.sortByInitiative(encounter.id)"
-      @undo="store.undoLast()"
       @clear="store.clearEncounterState(encounter.id)"
     />
 

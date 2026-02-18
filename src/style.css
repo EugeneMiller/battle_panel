@@ -77,6 +77,12 @@ a {
   padding: 12px;
 }
 
+.encounter-header {
+  position: sticky;
+  top: 58px;
+  z-index: 12;
+}
+
 .combatant-card.active {
   outline: 2px solid var(--accent);
 }
