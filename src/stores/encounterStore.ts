@@ -496,6 +496,16 @@ export const useEncounterStore = defineStore("encounter", () => {
     await addLog(condition.encounterId, "remove_condition", { conditionId }, condition.combatantId);
   }
 
+  async function updateCondition(conditionId: string, patch: Partial<ConditionInstance>) {
+    const index = conditions.value.findIndex((c) => c.id === conditionId);
+    if (index < 0) return;
+    const current = conditions.value[index];
+    await recordUndo(current.encounterId);
+    const updated: ConditionInstance = { ...current, ...patch, id: current.id };
+    conditions.value[index] = updated;
+    await db.conditions.put(updated);
+  }
+
   async function breakConcentration(combatantId: string) {
     const combatant = combatants.value.find((c) => c.id === combatantId);
     if (!combatant) return;
@@ -653,6 +663,7 @@ export const useEncounterStore = defineStore("encounter", () => {
     heal,
     setHp,
     addCondition,
+    updateCondition,
     removeCondition,
     breakConcentration,
     modifySlot,

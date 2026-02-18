@@ -90,6 +90,16 @@ export interface SpellcastingBlock {
   showSpells: boolean;
 }
 
+export interface AttackEntry {
+  id: string;
+  name: string;
+  toHit?: number;
+  damage?: string;
+  damageType?: string;
+  attacksCount?: number;
+  notes?: string;
+}
+
 export interface Combatant {
   id: string;
   encounterId: string;
@@ -112,6 +122,7 @@ export interface Combatant {
   isHidden: boolean;
   publicNotes?: string;
   gmNotes?: string;
+  attacks?: AttackEntry[];
   deathSaves?: DeathSaves;
   spellcasting?: SpellcastingBlock;
 }

@@ -185,6 +185,16 @@ textarea {
   background: #203146;
 }
 
+.chip-toggle {
+  color: var(--text);
+  cursor: pointer;
+}
+
+.condition-toggle.active {
+  background: #315848;
+  border-color: #4f7f6c;
+}
+
 .chip-close {
   border: 0;
   background: transparent;
@@ -227,6 +237,11 @@ textarea {
   display: grid;
   gap: 8px;
   margin-top: 8px;
+}
+
+.attack-list {
+  margin: 6px 0 0;
+  padding-left: 18px;
 }
 
 @media (max-width: 860px) {

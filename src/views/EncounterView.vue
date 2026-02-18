@@ -50,6 +50,7 @@
         @set-hp="store.setHp(combatant.id, $event)"
         @add-condition="store.addCondition(combatant.id, $event)"
         @remove-condition="store.removeCondition($event)"
+        @update-condition="(conditionId, patch) => store.updateCondition(conditionId, patch)"
         @break-concentration="store.breakConcentration(combatant.id)"
         @slot-mod="(level, delta) => store.modifySlot(combatant.id, level, delta)"
         @toggle-spells="store.toggleSpellsVisible(combatant.id)"

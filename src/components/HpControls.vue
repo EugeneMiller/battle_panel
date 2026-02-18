@@ -9,14 +9,6 @@
       <button class="btn" @click="heal">Heal</button>
       <button class="btn" @click="setExact">Set HP</button>
     </div>
-    <div class="row">
-      <button class="chip-btn" @click="$emit('damage', 1)">-1</button>
-      <button class="chip-btn" @click="$emit('damage', 5)">-5</button>
-      <button class="chip-btn" @click="$emit('damage', 10)">-10</button>
-      <button class="chip-btn" @click="$emit('heal', 1)">+1</button>
-      <button class="chip-btn" @click="$emit('heal', 5)">+5</button>
-      <button class="chip-btn" @click="$emit('heal', 10)">+10</button>
-    </div>
   </div>
 </template>
 

@@ -23,7 +23,12 @@
 
     <HpControls :combatant="combatant" @damage="$emit('damage', $event)" @heal="$emit('heal', $event)" @set-hp="$emit('set-hp', $event)" />
 
-    <ConditionsPanel :conditions="conditions" @add="$emit('add-condition', $event)" @remove="$emit('remove-condition', $event)" />
+    <ConditionsPanel
+      :conditions="conditions"
+      @add="$emit('add-condition', $event)"
+      @remove="$emit('remove-condition', $event)"
+      @update="(conditionId, patch) => $emit('update-condition', conditionId, patch)"
+    />
 
     <SpellcastingPanel
       :spellcasting="combatant.spellcasting"
@@ -68,6 +73,16 @@ const emit = defineEmits<{
     }
   ];
   "remove-condition": [conditionId: string];
+  "update-condition": [
+    conditionId: string,
+    patch: {
+      name?: string;
+      durationType?: "rounds" | "minutes" | "hours" | "until_discarded";
+      durationRemaining?: number;
+      endsOn?: "start_of_turn" | "end_of_turn";
+      concentration?: boolean;
+    }
+  ];
   "break-concentration": [];
   "slot-mod": [level: number, delta: 1 | -1];
   "toggle-spells": [];
