@@ -1,12 +1,8 @@
 <template>
   <section class="details-panel">
-    <div class="row">
-      <button class="btn" @click="toggle">
-        {{ isOpen ? "Hide details" : "Show details" }}
-      </button>
-      <button class="btn" @click="openEditor">Edit details</button>
-    </div>
-    <div v-if="isOpen" class="details-grid">
+    <button v-if="!isOpen" class="btn" @click="showDetails">Show details</button>
+
+    <div v-else-if="!editorOpen" class="details-grid">
       <div><strong>Speed:</strong> {{ combatant.speed || "-" }}</div>
       <div><strong>Tags:</strong> {{ combatant.tags?.join(", ") || "-" }}</div>
       <div>
@@ -55,8 +51,13 @@
         V {{ combatant.resistVulnImmune?.vuln?.join(", ") || "-" }}
         I {{ combatant.resistVulnImmune?.immune?.join(", ") || "-" }}
       </div>
+      <div class="row">
+        <button class="btn" @click="openEditor">Edit details</button>
+        <button class="btn" @click="hideDetails">Hide details</button>
+      </div>
     </div>
-    <div v-if="editorOpen" class="details-editor">
+
+    <div v-else class="details-editor">
       <div class="row wrap">
         <label class="field">
           <span class="muted">Speed</span>
@@ -140,7 +141,7 @@
       </div>
       <div class="row">
         <button class="btn btn-primary" @click="saveEditor">Save</button>
-        <button class="btn" @click="editorOpen = false">Cancel</button>
+        <button class="btn" @click="cancelEditor">Cancel</button>
       </div>
     </div>
   </section>
@@ -191,8 +192,13 @@ function formatModifier(modifier: number): string {
   return modifier >= 0 ? `+${modifier}` : String(modifier);
 }
 
-function toggle() {
-  isOpen.value = !isOpen.value;
+function showDetails() {
+  isOpen.value = true;
+}
+
+function hideDetails() {
+  isOpen.value = false;
+  editorOpen.value = false;
 }
 
 function openEditor() {
@@ -306,6 +312,12 @@ function saveEditor() {
     multiattackCount: parseNumber(editor.value.multiattackCount)
   });
   editorOpen.value = false;
+  isOpen.value = true;
+}
+
+function cancelEditor() {
+  editorOpen.value = false;
+  isOpen.value = true;
 }
 
 function formatDamage(attack: AttackEntry): string {
