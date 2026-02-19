@@ -1,6 +1,9 @@
 <template>
   <section class="details-panel">
-    <button v-if="!isOpen" class="btn" @click="showDetails">Show details</button>
+    <div v-if="!isOpen" class="row">
+      <button class="btn" @click="showDetails">Show details</button>
+      <button class="btn" @click="$emit('export-combatant')">Export combatant</button>
+    </div>
 
     <div v-else-if="!editorOpen" class="details-grid">
       <div><strong>Speed:</strong> {{ combatant.speed || "-" }}</div>
@@ -53,6 +56,7 @@
       </div>
       <div class="row">
         <button class="btn" @click="openEditor">Edit details</button>
+        <button class="btn" @click="$emit('export-combatant')">Export combatant</button>
         <button class="btn" @click="hideDetails">Hide details</button>
       </div>
     </div>
@@ -153,7 +157,10 @@ import { makeId } from "../utils/id";
 import type { AbilityBlock, AttackEntry, Combatant, ResistVulnImmune } from "../models/types";
 
 const props = defineProps<{ combatant: Combatant }>();
-const emit = defineEmits<{ update: [patch: Partial<Combatant>] }>();
+const emit = defineEmits<{
+  update: [patch: Partial<Combatant>];
+  "export-combatant": [];
+}>();
 const isOpen = ref(false);
 const editorOpen = ref(false);
 const editor = ref({

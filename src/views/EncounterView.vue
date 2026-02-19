@@ -29,6 +29,7 @@
         @toggle-spells="store.toggleSpellsVisible(combatant.id)"
         @toggle-expanded="store.toggleCombatantExpanded(combatant.id)"
         @update-combatant="store.updateCombatant(combatant.id, $event)"
+        @export-combatant="exportCombatant(combatant)"
         @remove="removeCombatant(combatant.id)"
       />
     </div>
@@ -52,6 +53,16 @@
         </select>
         <button class="btn btn-primary" @click="addCombatant">Add</button>
       </div>
+      <div class="row wrap">
+        <textarea
+          v-model="combatantJsonText"
+          class="json-box"
+          placeholder='Paste combatant JSON here'
+        ></textarea>
+      </div>
+      <div class="row wrap">
+        <button class="btn" @click="importCombatantFromJson">Load combatant</button>
+      </div>
     </section>
 
     <ImportExport
@@ -70,14 +81,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive } from "vue";
+import { computed, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useEncounterStore } from "../stores/encounterStore";
 import EncounterHeader from "../components/EncounterHeader.vue";
 import CombatantCard from "../components/CombatantCard.vue";
 import ImportExport from "../components/ImportExport.vue";
 import CombatLog from "../components/CombatLog.vue";
-import type { CombatantType, SpellcastingBlock } from "../models/types";
+import type { Combatant, CombatantType, SpellcastingBlock } from "../models/types";
 
 const route = useRoute();
 const store = useEncounterStore();
@@ -95,6 +106,7 @@ const draft = reactive({
   spellcaster: false,
   spellMode: "slots" as "slots" | "pact"
 });
+const combatantJsonText = ref("");
 
 async function addCombatant() {
   if (!encounter.value || !draft.name.trim()) return;
@@ -132,6 +144,91 @@ async function removeCombatant(combatantId: string) {
 
 async function onImport(json: string, strategy: "replace" | "merge") {
   await store.importFromJson(json, strategy);
+}
+
+function exportCombatant(combatant: Combatant) {
+  const payload = {
+    version: 1,
+    kind: "combatant",
+    exportedAt: Date.now(),
+    combatant: {
+      type: combatant.type,
+      name: combatant.name,
+      initiative: combatant.initiative,
+      hpCurrent: combatant.hpCurrent,
+      hpMax: combatant.hpMax,
+      tempHp: combatant.tempHp,
+      ac: combatant.ac,
+      speed: combatant.speed,
+      abilities: combatant.abilities,
+      saves: combatant.saves,
+      passives: combatant.passives,
+      resistVulnImmune: combatant.resistVulnImmune,
+      tags: combatant.tags,
+      isHidden: combatant.isHidden,
+      isConcentrating: combatant.isConcentrating,
+      publicNotes: combatant.publicNotes,
+      gmNotes: combatant.gmNotes,
+      attacks: combatant.attacks,
+      multiattackCount: combatant.multiattackCount,
+      deathSaves: combatant.deathSaves,
+      spellcasting: combatant.spellcasting
+    }
+  };
+  download(JSON.stringify(payload, null, 2), `${combatant.name}.combatant.json`);
+}
+
+function getImportedCombatantPayload(raw: string): Partial<Combatant> | null {
+  const parsed = JSON.parse(raw) as unknown;
+  if (!parsed || typeof parsed !== "object") return null;
+  const root = parsed as Record<string, unknown>;
+  const candidate =
+    root.kind === "combatant" && root.combatant && typeof root.combatant === "object"
+      ? (root.combatant as Record<string, unknown>)
+      : root;
+  if (typeof candidate.name !== "string" || typeof candidate.type !== "string") return null;
+  if (typeof candidate.hpMax !== "number") return null;
+  return candidate as Partial<Combatant>;
+}
+
+async function importCombatantFromJson() {
+  if (!encounter.value) return;
+  const text = combatantJsonText.value.trim();
+  if (!text) return;
+  let input: Partial<Combatant> | null = null;
+  try {
+    input = getImportedCombatantPayload(text);
+  } catch {
+    input = null;
+  }
+  if (!input || typeof input.name !== "string" || typeof input.type !== "string" || typeof input.hpMax !== "number") {
+    window.alert("Invalid combatant JSON");
+    return;
+  }
+  await store.addCombatant(encounter.value.id, {
+    name: input.name,
+    type: input.type as CombatantType,
+    hpMax: input.hpMax,
+    hpCurrent: typeof input.hpCurrent === "number" ? input.hpCurrent : input.hpMax,
+    tempHp: typeof input.tempHp === "number" ? input.tempHp : 0,
+    initiative: typeof input.initiative === "number" ? input.initiative : null,
+    ac: typeof input.ac === "number" ? input.ac : null,
+    speed: input.speed,
+    abilities: input.abilities,
+    saves: input.saves,
+    passives: input.passives,
+    resistVulnImmune: input.resistVulnImmune,
+    tags: input.tags,
+    isHidden: Boolean(input.isHidden),
+    isConcentrating: Boolean(input.isConcentrating),
+    publicNotes: input.publicNotes,
+    gmNotes: input.gmNotes,
+    attacks: input.attacks,
+    multiattackCount: input.multiattackCount,
+    deathSaves: input.deathSaves,
+    spellcasting: input.spellcasting
+  });
+  combatantJsonText.value = "";
 }
 
 function download(content: string, filename: string) {

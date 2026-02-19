@@ -66,7 +66,11 @@
         @toggle-show-spells="$emit('toggle-spells')"
       />
 
-      <DetailsAccordion :combatant="combatant" @update="$emit('update-combatant', $event)" />
+      <DetailsAccordion
+        :combatant="combatant"
+        @update="$emit('update-combatant', $event)"
+        @export-combatant="$emit('export-combatant')"
+      />
 
       <div v-if="combatant.type === 'PC' && combatant.hpCurrent <= 0 && combatant.deathSaves" class="death-saves">
         Death saves: {{ combatant.deathSaves.success }} success / {{ combatant.deathSaves.fail }} fail
@@ -118,6 +122,7 @@ const emit = defineEmits<{
   "toggle-spells": [];
   "toggle-expanded": [];
   "update-combatant": [patch: Partial<Combatant>];
+  "export-combatant": [];
   remove: [];
 }>();
 
