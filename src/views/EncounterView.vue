@@ -20,6 +20,7 @@
         @damage="store.applyDamage(combatant.id, $event)"
         @heal="store.heal(combatant.id, $event)"
         @set-hp="store.setHp(combatant.id, $event)"
+        @set-temp="store.setTempHp(combatant.id, $event)"
         @add-condition="store.addCondition(combatant.id, $event)"
         @remove-condition="store.removeCondition($event)"
         @update-condition="(conditionId, patch) => store.updateCondition(conditionId, patch)"
@@ -65,12 +66,6 @@
       </div>
     </section>
 
-    <ImportExport
-      @export-all="download(store.exportAsJson(), `battle-export-${Date.now()}.json`)"
-      @export-encounter="download(store.exportAsJson(encounter.id), `${encounter.name}.json`)"
-      @import="onImport"
-    />
-
     <CombatLog :entries="store.logsForEncounter(encounter.id)" :combatants="combatants" />
   </section>
 
@@ -86,7 +81,6 @@ import { useRoute } from "vue-router";
 import { useEncounterStore } from "../stores/encounterStore";
 import EncounterHeader from "../components/EncounterHeader.vue";
 import CombatantCard from "../components/CombatantCard.vue";
-import ImportExport from "../components/ImportExport.vue";
 import CombatLog from "../components/CombatLog.vue";
 import type { Combatant, CombatantType, SpellcastingBlock } from "../models/types";
 
@@ -140,10 +134,6 @@ async function addCombatant() {
 async function removeCombatant(combatantId: string) {
   if (!window.confirm("Delete combatant?")) return;
   await store.removeCombatant(combatantId);
-}
-
-async function onImport(json: string, strategy: "replace" | "merge") {
-  await store.importFromJson(json, strategy);
 }
 
 function exportCombatant(combatant: Combatant) {

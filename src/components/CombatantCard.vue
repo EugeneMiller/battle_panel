@@ -47,6 +47,7 @@
         @damage="$emit('damage', $event)"
         @heal="$emit('heal', $event)"
         @set-hp="$emit('set-hp', $event)"
+        @set-temp="$emit('set-temp', $event)"
       />
 
       <label class="check conc-toggle">
@@ -98,6 +99,7 @@ const emit = defineEmits<{
   damage: [amount: number];
   heal: [amount: number];
   "set-hp": [value: number];
+  "set-temp": [value: number];
   "add-condition": [
     {
       name: string;

@@ -48,9 +48,18 @@ defineEmits<{
 const query = ref("");
 
 const filteredSpells = computed(() => {
-  const list = props.spellcasting?.spellsKnown ?? [];
+  const spellcasting = props.spellcasting;
+  const list = [
+    ...(spellcasting?.spellsKnown ?? []),
+    ...(spellcasting?.preparedSpells ?? [])
+  ];
+  const unique = new Map<string, (typeof list)[number]>();
+  for (const spell of list) {
+    if (!unique.has(spell.id)) unique.set(spell.id, spell);
+  }
+  const merged = Array.from(unique.values());
   const q = query.value.trim().toLowerCase();
-  if (!q) return list;
-  return list.filter((spell) => spell.name.toLowerCase().includes(q));
+  if (!q) return merged;
+  return merged.filter((spell) => spell.name.toLowerCase().includes(q));
 });
 </script>

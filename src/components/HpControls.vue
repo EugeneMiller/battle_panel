@@ -8,6 +8,7 @@
       <button class="btn" @click="damage">Damage</button>
       <button class="btn" @click="heal">Heal</button>
       <button class="btn" @click="setExact">Set HP</button>
+      <button class="btn" @click="setTemp">Set Temp</button>
     </div>
   </div>
 </template>
@@ -21,6 +22,7 @@ const emit = defineEmits<{
   damage: [number];
   heal: [number];
   setHp: [number];
+  setTemp: [number];
 }>();
 
 const delta = ref(0);
@@ -35,5 +37,9 @@ function heal() {
 
 function setExact() {
   emit("setHp", delta.value);
+}
+
+function setTemp() {
+  emit("setTemp", delta.value);
 }
 </script>

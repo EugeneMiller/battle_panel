@@ -473,6 +473,14 @@ export const useEncounterStore = defineStore("encounter", () => {
     await addLog(combatant.encounterId, "set_hp", { value: updated.hpCurrent }, combatantId);
   }
 
+  async function setTempHp(combatantId: string, value: number) {
+    const combatant = combatants.value.find((c) => c.id === combatantId);
+    if (!combatant) return;
+    await recordUndo(combatant.encounterId);
+    const updated = { ...combatant, tempHp: Math.max(0, value) };
+    await updateCombatant(combatantId, updated);
+  }
+
   async function addCondition(
     combatantId: string,
     input: Omit<ConditionInstance, "id" | "combatantId" | "encounterId" | "createdAt">
@@ -687,6 +695,7 @@ export const useEncounterStore = defineStore("encounter", () => {
     applyDamage,
     heal,
     setHp,
+    setTempHp,
     addCondition,
     updateCondition,
     removeCondition,
