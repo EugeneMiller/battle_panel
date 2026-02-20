@@ -289,6 +289,7 @@ export const useEncounterStore = defineStore("encounter", () => {
       isConcentrating: input.isConcentrating ?? false,
       publicNotes: input.publicNotes,
       gmNotes: input.gmNotes,
+      attacks: input.attacks,
       deathSaves: input.deathSaves,
       multiattackCount: input.multiattackCount,
       spellcasting: input.spellcasting

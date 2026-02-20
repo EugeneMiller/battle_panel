@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "kind": "combatant",
+  "exportedAt": 1772000000000,
+  "combatant": {
+    "type": "NPC",
+    "name": "Теневой Призрак Джокера",
+    "initiative": null,
+    "hpCurrent": 80,
+    "hpMax": 80,
+    "tempHp": 0,
+    "ac": 16,
+    "speed": "45 ft",
+    "abilities": {
+      "str": 14,
+      "dex": 18,
+      "con": 14,
+      "int": 11,
+      "wis": 17,
+      "cha": 10
+    },
+    "saves": {
+      "str": 5,
+      "dex": 7,
+      "con": 5
+    },
+    "passives": {
+      "perception": 16
+    },
+    "resistVulnImmune": {
+      "resist": ["яд"],
+      "immune": ["очарование", "испуг", "яд"]
+    },
+    "tags": ["NPC", "Союзник", "CR 6", "Монах"],
+    "isHidden": false,
+    "attacks": [
+      {
+        "id": "atk_shadow_multi",
+        "name": "Мультиатака",
+        "attacksCount": 3,
+        "notes": "Три безоружные атаки."
+      },
+      {
+        "id": "atk_shadow_unarmed",
+        "name": "Безоружная атака",
+        "toHit": 7,
+        "damage": "1к8+4",
+        "damageType": "дробящий",
+        "notes": "Оглушающий удар 3/день, Сл 15 Тел."
+      },
+      {
+        "id": "atk_shadow_breath",
+        "name": "Дыхание теней",
+        "notes": "1/день: тьма 15 фт на 1 минуту, монах видит сквозь нее."
+      }
+    ],
+    "gmNotes": "Поступь Сумерек 2/день (телепорт 60 фт в тени). Теневой Воин: преим. инициатива/Скрытность в тени. Доспех Теней: КД 10+Ловк+Муд. Уклонение. Парирование стрел: 1к10+9."
+  }
+}
