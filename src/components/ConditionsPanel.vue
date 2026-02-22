@@ -171,15 +171,18 @@ function openEditor(
         name: string;
         durationType: DurationType;
         durationRemaining?: number;
-    }
+        endsOn?: ConditionEndPhase;
+      }
 ) {
   suppressClickUntil.value = Date.now() + 250;
+  const conditionId = condition && "id" in condition ? condition.id : undefined;
+  const endsOn = condition && "endsOn" in condition ? condition.endsOn : undefined;
   editor.value = {
-    conditionId: condition?.id || undefined,
+    conditionId,
     name: condition?.name ?? "",
     durationType: condition?.durationType ?? "hours",
     durationRemaining: condition?.durationRemaining ?? 1,
-    endsOn: condition?.endsOn ?? "end_of_turn"
+    endsOn: endsOn ?? "end_of_turn"
   };
   editorOpen.value = true;
 }

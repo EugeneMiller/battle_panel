@@ -199,9 +199,21 @@ function saveEditor() {
       school: spell.school?.trim() || undefined
     }));
 
+  const existingSlots = new Map(
+    (props.spellcasting.slots ?? []).map((slot) => [slot.level, slot.used])
+  );
+  const updatedSlots =
+    props.spellcasting.mode === "slots"
+      ? editor.value.slots.map((slot) => ({
+          level: slot.level,
+          max: Math.max(0, slot.max),
+          used: existingSlots.get(slot.level) ?? 0
+        }))
+      : props.spellcasting.slots;
+
   const updated: SpellcastingBlock = {
     ...props.spellcasting,
-    slots: props.spellcasting.mode === "slots" ? editor.value.slots : props.spellcasting.slots,
+    slots: updatedSlots,
     pact:
       props.spellcasting.mode === "pact"
         ? { slotLevel: Math.max(1, editor.value.pact.slotLevel), max: Math.max(0, editor.value.pact.max), used: 0 }
