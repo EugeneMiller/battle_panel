@@ -10,11 +10,12 @@
           {{ preset }}
         </option>
       </select>
-      <button class="btn" @click="applyPreset">Set</button>
-      <button class="btn" @click="specPreset">Spec</button>
-      <button class="btn" @click="openEditor()">+ Custom</button>
+      <div class="row">
+        <button class="btn" @click="applyPreset">Set</button>
+        <button class="btn" @click="specPreset">Spec</button>
+        <button class="btn" @click="openEditor()">+ Custom</button>
+      </div>
     </div>
-
     <div class="chips">
       <button
         v-for="cond in conditions"

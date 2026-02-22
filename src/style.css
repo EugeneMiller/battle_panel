@@ -83,15 +83,26 @@ a {
   z-index: 12;
 }
 
+.encounter-header .actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .combatant-card.active {
   outline: 2px solid var(--accent);
+}
+
+.combatant-card {
+  overflow: hidden;
 }
 
 .card-top {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .card-list {
@@ -121,10 +132,27 @@ a {
   margin: 0;
 }
 
+.card-top > div:first-child {
+  min-width: 0;
+}
+
+.card-top .row {
+  min-width: 0;
+}
+
+.card-top h3 {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .meta,
 .muted {
   color: var(--muted);
   font-size: 0.92rem;
+  min-height: 40px;
+  align-content: center;
 }
 
 .btn,
@@ -321,5 +349,9 @@ textarea {
   .btn,
   .input-sm {
     width: 100%;
+  }
+
+  .encounter-header .actions .btn {
+    width: auto;
   }
 }

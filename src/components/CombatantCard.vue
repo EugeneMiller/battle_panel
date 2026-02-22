@@ -30,9 +30,6 @@
       </div>
       <div class="row card-actions">
         <button v-if="hasConcentration && !isExpanded" class="btn" @click="$emit('break-concentration')">Break conc</button>
-        <template v-if="isExpanded">
-          <button class="btn btn-danger" @click="$emit('remove')">Delete</button>
-        </template>
         <button
           class="btn btn-icon"
           :disabled="active"
@@ -76,8 +73,10 @@
         @remove="$emit('remove-condition', $event)"
         @update="(conditionId, patch) => $emit('update-condition', conditionId, patch)"
       />
-
-      <button class="btn" @click="$emit('export-combatant')">Export combatant</button>
+      <div class="row">
+        <button class="btn" @click="$emit('export-combatant')">Export combatant</button>
+        <button class="btn btn-danger" @click="$emit('remove')">Delete</button>
+      </div>
     </template>
   </article>
 </template>
