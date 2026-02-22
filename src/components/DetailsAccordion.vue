@@ -1,11 +1,11 @@
 <template>
   <section class="details-panel">
-    <div v-if="!isOpen" class="row">
-      <button class="btn" @click="showDetails">Show details</button>
-      <button class="btn" @click="$emit('export-combatant')">Export combatant</button>
+    <div class="row">
+      <strong>Details</strong>
+      <button class="btn" @click="toggleDetails">{{ isOpen ? "-" : "+" }}</button>
     </div>
 
-    <div v-else-if="!editorOpen" class="details-grid">
+    <div v-if="isOpen && !editorOpen" class="details-grid">
       <div><strong>Speed:</strong> {{ combatant.speed || "-" }}</div>
       <div><strong>Tags:</strong> {{ combatant.tags?.join(", ") || "-" }}</div>
       <div>
@@ -56,12 +56,10 @@
       </div>
       <div class="row">
         <button class="btn" @click="openEditor">Edit details</button>
-        <button class="btn" @click="$emit('export-combatant')">Export combatant</button>
-        <button class="btn" @click="hideDetails">Hide details</button>
       </div>
     </div>
 
-    <div v-else class="details-editor">
+    <div v-else-if="isOpen" class="details-editor">
       <div class="row wrap">
         <label class="field">
           <span class="muted">Speed</span>
@@ -159,7 +157,6 @@ import type { AbilityBlock, AttackEntry, Combatant, ResistVulnImmune } from "../
 const props = defineProps<{ combatant: Combatant }>();
 const emit = defineEmits<{
   update: [patch: Partial<Combatant>];
-  "export-combatant": [];
 }>();
 const isOpen = ref(false);
 const editorOpen = ref(false);
@@ -199,13 +196,9 @@ function formatModifier(modifier: number): string {
   return modifier >= 0 ? `+${modifier}` : String(modifier);
 }
 
-function showDetails() {
-  isOpen.value = true;
-}
-
-function hideDetails() {
-  isOpen.value = false;
-  editorOpen.value = false;
+function toggleDetails() {
+  isOpen.value = !isOpen.value;
+  if (!isOpen.value) editorOpen.value = false;
 }
 
 function openEditor() {

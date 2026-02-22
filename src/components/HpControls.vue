@@ -1,14 +1,15 @@
 <template>
   <div class="hp-controls">
-    <div class="hp-line">
+    <!--div class="hp-line">
       <strong>HP:</strong> {{ combatant.hpCurrent }}/{{ combatant.hpMax }} <span>Temp {{ combatant.tempHp }}</span>
-    </div>
+    </div-->
     <div class="row">
+      <strong>HP:</strong>
       <input v-model.number="delta" type="number" min="0" class="input-sm" />
-      <button class="btn" @click="damage">Damage</button>
-      <button class="btn" @click="heal">Heal</button>
-      <button class="btn" @click="setExact">Set HP</button>
-      <button class="btn" @click="setTemp">Set Temp</button>
+      <button class="btn" @click="damage">-</button>
+      <button class="btn" @click="heal">+</button>
+      <button class="btn" @click="setExact">Set</button>
+      <button class="btn" @click="setTemp">Tmp</button>
     </div>
   </div>
 </template>

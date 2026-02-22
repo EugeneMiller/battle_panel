@@ -9,25 +9,28 @@
         </div>
         <div class="muted">
           {{ combatant.type }} | Init:
-          <input
-            :value="combatant.initiative ?? ''"
-            type="number"
-            class="input-sm inline"
-            @change="onInitiativeChange"
-          />
+          <template v-if="isExpanded">
+            <input
+              :value="combatant.initiative ?? ''"
+              type="number"
+              class="input-sm inline"
+              @change="onInitiativeChange"
+            />
+          </template>
+          <template v-else>
+            {{ combatant.initiative ?? "-" }}
+          </template>
           <span v-if="combatant.ac !== null">| AC {{ combatant.ac }}</span>
-        </div>
-        <div v-if="!isExpanded" class="hp-compact">
-          <strong>HP:</strong> {{ combatant.hpCurrent }}/{{ combatant.hpMax }}
-          <span v-if="combatant.tempHp"> Temp {{ combatant.tempHp }}</span>
+            | HP {{ combatant.hpCurrent }}/{{ combatant.hpMax }}
+            <span v-if="combatant.tempHp"> Temp {{ combatant.tempHp }}</span>
         </div>
         <div v-if="!isExpanded && conditionSummary" class="muted hp-compact">
           {{ conditionSummary }}
         </div>
       </div>
       <div class="row card-actions">
+        <button v-if="hasConcentration && !isExpanded" class="btn" @click="$emit('break-concentration')">Break conc</button>
         <template v-if="isExpanded">
-          <button class="btn" @click="$emit('break-concentration')">Break conc</button>
           <button class="btn btn-danger" @click="$emit('remove')">Delete</button>
         </template>
         <button
@@ -36,23 +39,36 @@
           :title="active ? 'Active combatant stays expanded' : 'Toggle details'"
           @click="$emit('toggle-expanded')"
         >
-          {{ isExpanded ? "v" : ">" }}
+          {{ isExpanded ? "-" : "+" }}
         </button>
       </div>
     </header>
 
+    <HpControls
+      :combatant="combatant"
+      @damage="$emit('damage', $event)"
+      @heal="$emit('heal', $event)"
+      @set-hp="$emit('set-hp', $event)"
+      @set-temp="$emit('set-temp', $event)"
+    />
+
     <template v-if="isExpanded">
-      <HpControls
-        :combatant="combatant"
-        @damage="$emit('damage', $event)"
-        @heal="$emit('heal', $event)"
-        @set-hp="$emit('set-hp', $event)"
-        @set-temp="$emit('set-temp', $event)"
+      <SpellcastingPanel
+        :spellcasting="combatant.spellcasting"
+        :concentration="hasConcentration"
+        @slot-mod="(level, delta) => $emit('slot-mod', level, delta)"
+        @set-concentration="$emit('set-concentration', $event)"
+        @update-spellcasting="$emit('update-combatant', { spellcasting: $event })"
       />
 
-      <label class="check conc-toggle">
-        <input type="checkbox" :checked="hasConcentration" @change="onConcentrationChange" /> Concentration
-      </label>
+      <DetailsAccordion
+        :combatant="combatant"
+        @update="$emit('update-combatant', $event)"
+      />
+
+      <div v-if="combatant.type === 'PC' && combatant.hpCurrent <= 0 && combatant.deathSaves" class="death-saves">
+        Death saves: {{ combatant.deathSaves.success }} success / {{ combatant.deathSaves.fail }} fail
+      </div>
 
       <ConditionsPanel
         :conditions="conditions"
@@ -61,21 +77,7 @@
         @update="(conditionId, patch) => $emit('update-condition', conditionId, patch)"
       />
 
-      <SpellcastingPanel
-        :spellcasting="combatant.spellcasting"
-        @slot-mod="(level, delta) => $emit('slot-mod', level, delta)"
-        @toggle-show-spells="$emit('toggle-spells')"
-      />
-
-      <DetailsAccordion
-        :combatant="combatant"
-        @update="$emit('update-combatant', $event)"
-        @export-combatant="$emit('export-combatant')"
-      />
-
-      <div v-if="combatant.type === 'PC' && combatant.hpCurrent <= 0 && combatant.deathSaves" class="death-saves">
-        Death saves: {{ combatant.deathSaves.success }} success / {{ combatant.deathSaves.fail }} fail
-      </div>
+      <button class="btn" @click="$emit('export-combatant')">Export combatant</button>
     </template>
   </article>
 </template>
@@ -138,9 +140,5 @@ function onInitiativeChange(event: Event) {
   const value = Number((event.target as HTMLInputElement).value);
   if (Number.isNaN(value)) emit("initiative-change", null);
   else emit("initiative-change", value);
-}
-
-function onConcentrationChange(event: Event) {
-  emit("set-concentration", (event.target as HTMLInputElement).checked);
 }
 </script>

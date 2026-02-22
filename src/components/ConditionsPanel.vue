@@ -2,20 +2,17 @@
   <section class="conditions-panel">
     <div class="row split">
       <strong>Conditions</strong>
-      <button class="btn" @click="openEditor()">+ Custom</button>
     </div>
 
     <div class="row wrap">
-      <button
-        v-for="preset in presets"
-        :key="preset"
-        class="btn condition-toggle"
-        :class="{ active: hasCondition(preset) }"
-        @click="togglePreset(preset)"
-        @dblclick.prevent.stop="openEditorByName(preset)"
-      >
-        {{ preset }}
-      </button>
+      <select v-model="selectedPreset" class="input-sm">
+        <option v-for="preset in presets" :key="preset" :value="preset">
+          {{ preset }}
+        </option>
+      </select>
+      <button class="btn" @click="applyPreset">Set</button>
+      <button class="btn" @click="specPreset">Spec</button>
+      <button class="btn" @click="openEditor()">+ Custom</button>
     </div>
 
     <div class="chips">
@@ -107,6 +104,7 @@ const presets = [
 
 const editorOpen = ref(false);
 const suppressClickUntil = ref(0);
+const selectedPreset = ref(presets[0] ?? "");
 const editor = ref<{
   conditionId?: string;
   name: string;
@@ -140,6 +138,16 @@ function togglePreset(name: string) {
     durationType: "hours",
     durationRemaining: 1
   });
+}
+
+function applyPreset() {
+  if (!selectedPreset.value) return;
+  togglePreset(selectedPreset.value);
+}
+
+function specPreset() {
+  if (!selectedPreset.value) return;
+  openEditorByName(selectedPreset.value);
 }
 
 function openEditorByName(name: string) {
