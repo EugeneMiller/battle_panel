@@ -191,6 +191,35 @@ export const useLibraryStore = defineStore("library", () => {
     return entry.id;
   }
 
+  async function copyBestiaryEntry(entryId: string, targetCollectionId: string, entryName: string) {
+    const entry = bestiaryEntries.value.find((item) => item.id === entryId);
+    if (!entry) return null;
+    return addEntryToCollection(
+      targetCollectionId,
+      { ...clone(entry.blueprint), name: entryName },
+      entryName
+    );
+  }
+
+  async function updateBestiaryEntry(entryId: string, patch: Partial<BestiaryEntry>) {
+    const index = bestiaryEntries.value.findIndex((item) => item.id === entryId);
+    if (index < 0) return;
+    const current = bestiaryEntries.value[index];
+    const updated: BestiaryEntry = {
+      ...current,
+      ...patch,
+      id: current.id,
+      blueprint: patch.blueprint ? clone(patch.blueprint) : current.blueprint
+    };
+    bestiaryEntries.value[index] = updated;
+    await db.bestiaryEntries.put(updated);
+  }
+
+  async function deleteBestiaryEntry(entryId: string) {
+    bestiaryEntries.value = bestiaryEntries.value.filter((item) => item.id !== entryId);
+    await db.bestiaryEntries.delete(entryId);
+  }
+
   function exportMemberPayload(memberId: string): CombatantBlueprintPayload | null {
     const member = partyMembers.value.find((item) => item.id === memberId);
     if (!member) return null;
@@ -262,6 +291,9 @@ export const useLibraryStore = defineStore("library", () => {
     deletePartyMember,
     createBestiaryCollection,
     addEntryToCollection,
+    copyBestiaryEntry,
+    updateBestiaryEntry,
+    deleteBestiaryEntry,
     exportMemberPayload,
     exportPartyPayload,
     exportBestiaryEntryPayload,

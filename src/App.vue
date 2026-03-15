@@ -5,6 +5,7 @@
       <nav class="nav-links">
         <RouterLink to="/" class="about-link">Encounters</RouterLink>
         <RouterLink to="/parties" class="about-link">Parties</RouterLink>
+        <RouterLink to="/bestiary" class="about-link">Bestiary</RouterLink>
         <RouterLink to="/about" class="about-link">About</RouterLink>
       </nav>
     </header>
