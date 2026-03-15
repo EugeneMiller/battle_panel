@@ -3,6 +3,9 @@ export type CombatantType = "PC" | "NPC" | "Monster" | "Summon";
 export type ConditionName = string;
 export type DurationType = "rounds" | "minutes" | "hours" | "until_discarded";
 export type ConditionEndPhase = "start_of_turn" | "end_of_turn";
+export type LibraryScope = "system" | "custom";
+
+export const DATA_FORMAT_VERSION = 2;
 
 export interface EncounterSettings {
   confirmOnDelete: boolean;
@@ -127,6 +130,65 @@ export interface Combatant {
   multiattackCount?: number;
   deathSaves?: DeathSaves;
   spellcasting?: SpellcastingBlock;
+}
+
+export interface CombatantBlueprint {
+  type: CombatantType;
+  name: string;
+  initiative?: number | null;
+  hpCurrent?: number;
+  hpMax: number;
+  tempHp?: number;
+  ac?: number | null;
+  speed?: string;
+  abilities?: AbilityBlock;
+  saves?: SaveBlock;
+  passives?: PassiveBlock;
+  resistVulnImmune?: ResistVulnImmune;
+  tags?: string[];
+  isHidden?: boolean;
+  isConcentrating?: boolean;
+  publicNotes?: string;
+  gmNotes?: string;
+  attacks?: AttackEntry[];
+  multiattackCount?: number;
+  deathSaves?: DeathSaves;
+  spellcasting?: SpellcastingBlock;
+}
+
+export interface Party {
+  id: string;
+  name: string;
+  scope: LibraryScope;
+  isDefault: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface PartyMemberTemplate {
+  id: string;
+  partyId: string;
+  order: number;
+  name: string;
+  className?: string;
+  level?: number;
+  blueprint: CombatantBlueprint;
+}
+
+export interface BestiaryCollection {
+  id: string;
+  name: string;
+  scope: LibraryScope;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface BestiaryEntry {
+  id: string;
+  collectionId: string;
+  order: number;
+  name: string;
+  blueprint: CombatantBlueprint;
 }
 
 export interface ConditionInstance {

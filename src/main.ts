@@ -5,6 +5,7 @@ import App from "./App.vue";
 import { router } from "./router";
 import "./style.css";
 import { useEncounterStore } from "./stores/encounterStore";
+import { useLibraryStore } from "./stores/libraryStore";
 
 registerSW({ immediate: true });
 
@@ -16,5 +17,7 @@ app.use(router);
 
 const store = useEncounterStore();
 store.init();
+const libraryStore = useLibraryStore();
+libraryStore.init();
 
 app.mount("#app");
