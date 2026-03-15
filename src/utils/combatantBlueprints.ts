@@ -52,3 +52,39 @@ export function combatantToBlueprint(combatant: Combatant): CombatantBlueprint {
     spellcasting: combatant.spellcasting
   };
 }
+
+export function blueprintToEditableCombatant(
+  id: string,
+  blueprint: CombatantBlueprint,
+  encounterId = "library"
+): Combatant {
+  const input = blueprintToCombatantInput(blueprint);
+  return {
+    id,
+    encounterId,
+    type: input.type,
+    name: input.name,
+    initiative: input.initiative ?? null,
+    initiativeTieBreaker: 0,
+    manualOrder: 0,
+    hpCurrent: input.hpCurrent ?? input.hpMax,
+    hpMax: input.hpMax,
+    tempHp: input.tempHp ?? 0,
+    ac: input.ac ?? null,
+    speed: input.speed,
+    abilities: input.abilities,
+    saves: input.saves,
+    passives: input.passives,
+    resistVulnImmune: input.resistVulnImmune,
+    tags: input.tags ?? [],
+    isExpanded: true,
+    isHidden: input.isHidden ?? false,
+    isConcentrating: input.isConcentrating ?? false,
+    publicNotes: input.publicNotes,
+    gmNotes: input.gmNotes,
+    attacks: input.attacks,
+    multiattackCount: input.multiattackCount,
+    deathSaves: input.deathSaves,
+    spellcasting: input.spellcasting
+  };
+}

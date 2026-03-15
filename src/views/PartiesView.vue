@@ -40,6 +40,18 @@
         </select>
         <span class="muted">Pick a custom party before copying templates.</span>
       </div>
+      <div v-else class="details-editor">
+        <div class="row wrap">
+          <textarea
+            v-model="partyImportJson[party.id]"
+            class="json-box compact-box"
+            placeholder="Paste combatant, party, or bestiary JSON to add members"
+          ></textarea>
+        </div>
+        <div class="row wrap">
+          <button class="btn" @click="importIntoParty(party.id)">Import JSON into party</button>
+        </div>
+      </div>
 
       <div class="card-list">
         <article
@@ -87,10 +99,10 @@
             <span v-if="member.blueprint.speed"> - {{ member.blueprint.speed }}</span>
           </div>
 
-          <LibraryCombatantEditor
+          <PartyMemberEditor
             v-if="party.scope === 'custom' && editingMemberIds[member.id]"
-            :model="member.blueprint"
-            @update="updateMemberBlueprint(member.id, $event)"
+            :combatant="editableCombatants[member.id]"
+            @update="updateMemberCombatant(member.id, $event)"
           />
         </article>
       </div>
@@ -101,17 +113,29 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
 import { useLibraryStore } from "../stores/libraryStore";
-import LibraryCombatantEditor from "../components/LibraryCombatantEditor.vue";
-import type { CombatantBlueprint } from "../models/types";
+import PartyMemberEditor from "../components/PartyMemberEditor.vue";
+import type { Combatant } from "../models/types";
 import { copyText } from "../utils/clipboard";
+import { blueprintToEditableCombatant, combatantToBlueprint } from "../utils/combatantBlueprints";
+import { parsePortableCombatants } from "../utils/importParsers";
 
 const libraryStore = useLibraryStore();
 const newPartyName = ref("");
 const partyTargets = reactive<Record<string, string>>({});
 const editingMemberIds = reactive<Record<string, boolean>>({});
+const partyImportJson = reactive<Record<string, string>>({});
 
 const customParties = computed(() =>
   libraryStore.orderedParties.filter((party) => party.scope === "custom")
+);
+
+const editableCombatants = computed<Record<string, Combatant>>(() =>
+  Object.fromEntries(
+    libraryStore.partyMembers.map((member) => [
+      member.id,
+      blueprintToEditableCombatant(member.id, member.blueprint)
+    ])
+  )
 );
 
 async function createParty() {
@@ -131,10 +155,13 @@ async function copyTemplateToParty(memberId: string, targetPartyId?: string) {
   await libraryStore.copyMemberToParty(memberId, targetPartyId, characterName);
 }
 
-async function updateMemberBlueprint(memberId: string, blueprint: CombatantBlueprint) {
+async function updateMemberCombatant(memberId: string, patch: Partial<Combatant>) {
+  const base = editableCombatants.value[memberId];
+  if (!base) return;
+  const merged: Combatant = { ...base, ...patch };
   await libraryStore.updatePartyMember(memberId, {
-    name: blueprint.name,
-    blueprint
+    name: merged.name,
+    blueprint: combatantToBlueprint(merged)
   });
 }
 
@@ -146,6 +173,26 @@ async function removeMember(memberId: string) {
 async function removeParty(partyId: string) {
   if (!window.confirm("Delete party and all members?")) return;
   await libraryStore.deleteParty(partyId);
+}
+
+async function importIntoParty(partyId: string) {
+  const raw = partyImportJson[partyId]?.trim();
+  if (!raw) return;
+  try {
+    const blueprints = parsePortableCombatants(raw);
+    for (const blueprint of blueprints) {
+      const characterName = window.prompt("Character name", blueprint.name)?.trim();
+      if (!characterName) continue;
+      await libraryStore.addMemberToParty(
+        partyId,
+        { ...blueprint, name: characterName, initiative: null },
+        characterName
+      );
+    }
+    partyImportJson[partyId] = "";
+  } catch {
+    window.alert("Invalid character JSON");
+  }
 }
 
 function toggleEditing(memberId: string) {
