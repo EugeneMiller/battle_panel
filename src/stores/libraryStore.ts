@@ -133,6 +133,36 @@ export const useLibraryStore = defineStore("library", () => {
     return member.id;
   }
 
+  async function copyMemberToParty(memberId: string, targetPartyId: string, characterName: string) {
+    const member = partyMembers.value.find((item) => item.id === memberId);
+    if (!member) return null;
+    return addMemberToParty(
+      targetPartyId,
+      { ...clone(member.blueprint), name: characterName },
+      characterName,
+      { className: member.className, level: member.level }
+    );
+  }
+
+  async function updatePartyMember(memberId: string, patch: Partial<PartyMemberTemplate>) {
+    const index = partyMembers.value.findIndex((item) => item.id === memberId);
+    if (index < 0) return;
+    const current = partyMembers.value[index];
+    const updated: PartyMemberTemplate = {
+      ...current,
+      ...patch,
+      id: current.id,
+      blueprint: patch.blueprint ? clone(patch.blueprint) : current.blueprint
+    };
+    partyMembers.value[index] = updated;
+    await db.partyMembers.put(updated);
+  }
+
+  async function deletePartyMember(memberId: string) {
+    partyMembers.value = partyMembers.value.filter((item) => item.id !== memberId);
+    await db.partyMembers.delete(memberId);
+  }
+
   async function createBestiaryCollection(name: string) {
     const stamp = now();
     const collection: BestiaryCollection = {
@@ -227,6 +257,9 @@ export const useLibraryStore = defineStore("library", () => {
     getCollectionEntries,
     createParty,
     addMemberToParty,
+    copyMemberToParty,
+    updatePartyMember,
+    deletePartyMember,
     createBestiaryCollection,
     addEntryToCollection,
     exportMemberPayload,

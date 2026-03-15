@@ -44,6 +44,12 @@ a {
   backdrop-filter: blur(8px);
 }
 
+.nav-links {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
 .brand {
   text-decoration: none;
   font-weight: 700;
@@ -281,6 +287,20 @@ textarea {
   display: grid;
   gap: 8px;
   margin-top: 8px;
+}
+
+.abilities-grid {
+  align-items: end;
+}
+
+.field-inline {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+}
+
+.compact-box {
+  min-height: 84px;
 }
 
 .details-editor {
