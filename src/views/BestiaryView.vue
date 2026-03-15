@@ -28,6 +28,13 @@
           >
             Add NPC
           </button>
+          <button
+            v-if="collection.scope === 'custom'"
+            class="btn btn-danger"
+            @click="removeCollection(collection.id)"
+          >
+            Delete library
+          </button>
         </div>
       </div>
 
@@ -80,8 +87,8 @@
 
           <div class="muted">
             HP {{ entry.blueprint.hpCurrent ?? entry.blueprint.hpMax }}/{{ entry.blueprint.hpMax }}
-            · AC {{ entry.blueprint.ac ?? "-" }}
-            <span v-if="entry.blueprint.speed"> · {{ entry.blueprint.speed }}</span>
+            - AC {{ entry.blueprint.ac ?? "-" }}
+            <span v-if="entry.blueprint.speed"> - {{ entry.blueprint.speed }}</span>
           </div>
 
           <LibraryCombatantEditor
@@ -100,6 +107,7 @@ import { computed, reactive, ref } from "vue";
 import LibraryCombatantEditor from "../components/LibraryCombatantEditor.vue";
 import { useLibraryStore } from "../stores/libraryStore";
 import type { CombatantBlueprint } from "../models/types";
+import { copyText } from "../utils/clipboard";
 
 const libraryStore = useLibraryStore();
 const newCollectionName = ref("");
@@ -155,6 +163,11 @@ async function removeEntry(entryId: string) {
   await libraryStore.deleteBestiaryEntry(entryId);
 }
 
+async function removeCollection(collectionId: string) {
+  if (!window.confirm("Delete NPC library and all entries?")) return;
+  await libraryStore.deleteBestiaryCollection(collectionId);
+}
+
 function toggleEditing(entryId: string) {
   editingEntryIds[entryId] = !editingEntryIds[entryId];
 }
@@ -162,17 +175,12 @@ function toggleEditing(entryId: string) {
 async function copyEntryJson(entryId: string) {
   const payload = libraryStore.exportBestiaryEntryPayload(entryId);
   if (!payload) return;
-  await copyJson(JSON.stringify(payload, null, 2));
+  await copyText(JSON.stringify(payload, null, 2));
 }
 
 async function copyCollectionJson(collectionId: string) {
   const payload = libraryStore.exportBestiaryCollectionPayload(collectionId);
   if (!payload) return;
-  await copyJson(JSON.stringify(payload, null, 2));
-}
-
-async function copyJson(text: string) {
-  await navigator.clipboard.writeText(text);
-  window.alert("JSON copied to clipboard.");
+  await copyText(JSON.stringify(payload, null, 2));
 }
 </script>

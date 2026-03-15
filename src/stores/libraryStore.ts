@@ -112,6 +112,16 @@ export const useLibraryStore = defineStore("library", () => {
     return party.id;
   }
 
+  async function deleteParty(partyId: string) {
+    const members = getPartyMembers(partyId);
+    await db.transaction("rw", db.parties, db.partyMembers, async () => {
+      await db.parties.delete(partyId);
+      if (members.length) await db.partyMembers.bulkDelete(members.map((member) => member.id));
+    });
+    parties.value = parties.value.filter((party) => party.id !== partyId);
+    partyMembers.value = partyMembers.value.filter((member) => member.partyId !== partyId);
+  }
+
   async function addMemberToParty(
     partyId: string,
     blueprint: CombatantBlueprint,
@@ -175,6 +185,18 @@ export const useLibraryStore = defineStore("library", () => {
     bestiaryCollections.value.push(collection);
     await db.bestiaryCollections.put(collection);
     return collection.id;
+  }
+
+  async function deleteBestiaryCollection(collectionId: string) {
+    const entries = getCollectionEntries(collectionId);
+    await db.transaction("rw", db.bestiaryCollections, db.bestiaryEntries, async () => {
+      await db.bestiaryCollections.delete(collectionId);
+      if (entries.length) await db.bestiaryEntries.bulkDelete(entries.map((entry) => entry.id));
+    });
+    bestiaryCollections.value = bestiaryCollections.value.filter(
+      (collection) => collection.id !== collectionId
+    );
+    bestiaryEntries.value = bestiaryEntries.value.filter((entry) => entry.collectionId !== collectionId);
   }
 
   async function addEntryToCollection(collectionId: string, blueprint: CombatantBlueprint, name: string) {
@@ -285,11 +307,13 @@ export const useLibraryStore = defineStore("library", () => {
     getPartyMembers,
     getCollectionEntries,
     createParty,
+    deleteParty,
     addMemberToParty,
     copyMemberToParty,
     updatePartyMember,
     deletePartyMember,
     createBestiaryCollection,
+    deleteBestiaryCollection,
     addEntryToCollection,
     copyBestiaryEntry,
     updateBestiaryEntry,

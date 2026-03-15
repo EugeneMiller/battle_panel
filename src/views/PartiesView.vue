@@ -21,6 +21,13 @@
         </div>
         <div class="row wrap">
           <button class="btn" @click="copyPartyJson(party.id)">Copy party JSON</button>
+          <button
+            v-if="party.scope === 'custom'"
+            class="btn btn-danger"
+            @click="removeParty(party.id)"
+          >
+            Delete party
+          </button>
         </div>
       </div>
 
@@ -45,7 +52,7 @@
               <h3 class="title">{{ member.name }}</h3>
               <div class="muted">
                 {{ member.className ?? member.blueprint.type }}
-                <span v-if="member.level"> · Level {{ member.level }}</span>
+                <span v-if="member.level"> - Level {{ member.level }}</span>
               </div>
             </div>
             <div class="row wrap">
@@ -76,8 +83,8 @@
 
           <div class="muted">
             HP {{ member.blueprint.hpCurrent ?? member.blueprint.hpMax }}/{{ member.blueprint.hpMax }}
-            · AC {{ member.blueprint.ac ?? "-" }}
-            <span v-if="member.blueprint.speed"> · {{ member.blueprint.speed }}</span>
+            - AC {{ member.blueprint.ac ?? "-" }}
+            <span v-if="member.blueprint.speed"> - {{ member.blueprint.speed }}</span>
           </div>
 
           <LibraryCombatantEditor
@@ -96,6 +103,7 @@ import { computed, reactive, ref } from "vue";
 import { useLibraryStore } from "../stores/libraryStore";
 import LibraryCombatantEditor from "../components/LibraryCombatantEditor.vue";
 import type { CombatantBlueprint } from "../models/types";
+import { copyText } from "../utils/clipboard";
 
 const libraryStore = useLibraryStore();
 const newPartyName = ref("");
@@ -135,6 +143,11 @@ async function removeMember(memberId: string) {
   await libraryStore.deletePartyMember(memberId);
 }
 
+async function removeParty(partyId: string) {
+  if (!window.confirm("Delete party and all members?")) return;
+  await libraryStore.deleteParty(partyId);
+}
+
 function toggleEditing(memberId: string) {
   editingMemberIds[memberId] = !editingMemberIds[memberId];
 }
@@ -142,17 +155,12 @@ function toggleEditing(memberId: string) {
 async function copyMemberJson(memberId: string) {
   const payload = libraryStore.exportMemberPayload(memberId);
   if (!payload) return;
-  await copyJson(JSON.stringify(payload, null, 2));
+  await copyText(JSON.stringify(payload, null, 2));
 }
 
 async function copyPartyJson(partyId: string) {
   const payload = libraryStore.exportPartyPayload(partyId);
   if (!payload) return;
-  await copyJson(JSON.stringify(payload, null, 2));
-}
-
-async function copyJson(text: string) {
-  await navigator.clipboard.writeText(text);
-  window.alert("JSON copied to clipboard.");
+  await copyText(JSON.stringify(payload, null, 2));
 }
 </script>

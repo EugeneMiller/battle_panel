@@ -3,7 +3,7 @@
     <h2>About</h2>
     <p>Offline-friendly D&D 5e combat tracker as a PWA.</p>
     <p>Version: {{ APP_VERSION }}</p>
-    <p>Data format version: 1</p>
+    <p>Data format version: 2</p>
   </section>
 </template>
 
