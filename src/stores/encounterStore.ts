@@ -106,8 +106,9 @@ export const useEncounterStore = defineStore("encounter", () => {
   }
 
   async function persistCombatant(combatant: Combatant) {
-    await db.combatants.put(combatant);
-    const encounter = getEncounterById(combatant.encounterId);
+    const normalized = clone(combatant);
+    await db.combatants.put(normalized);
+    const encounter = getEncounterById(normalized.encounterId);
     if (encounter) {
       encounter.updatedAt = now();
       await db.encounters.put(encounter);
@@ -266,7 +267,7 @@ export const useEncounterStore = defineStore("encounter", () => {
     input: Partial<Combatant> & Pick<Combatant, "name" | "type" | "hpMax">
   ) {
     const currentCount = combatants.value.filter((c) => c.encounterId === encounterId).length;
-    const combatant: Combatant = {
+    const combatant: Combatant = clone({
       id: makeId(),
       encounterId,
       type: input.type,
@@ -293,7 +294,7 @@ export const useEncounterStore = defineStore("encounter", () => {
       deathSaves: input.deathSaves,
       multiattackCount: input.multiattackCount,
       spellcasting: input.spellcasting
-    };
+    });
     combatants.value.push(combatant);
     await persistCombatant(combatant);
     return combatant.id;
@@ -302,7 +303,7 @@ export const useEncounterStore = defineStore("encounter", () => {
   async function updateCombatant(combatantId: string, patch: Partial<Combatant>) {
     const index = combatants.value.findIndex((c) => c.id === combatantId);
     if (index < 0) return;
-    const merged = { ...combatants.value[index], ...patch };
+    const merged = clone({ ...combatants.value[index], ...patch });
     combatants.value[index] = merged;
     await persistCombatant(merged);
   }
