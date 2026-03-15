@@ -20,6 +20,9 @@
           </div>
         </div>
         <div class="row wrap">
+          <button class="btn" @click="togglePartyOpen(party.id)">
+            {{ openedPartyIds[party.id] ? "Collapse" : "Expand" }}
+          </button>
           <button class="btn" @click="copyPartyJson(party.id)">Copy party JSON</button>
           <button
             v-if="party.scope === 'custom'"
@@ -31,7 +34,7 @@
         </div>
       </div>
 
-      <div v-if="party.scope === 'system'" class="row wrap">
+      <div v-if="openedPartyIds[party.id] && party.scope === 'system'" class="row wrap">
         <select v-model="partyTargets[party.id]" class="input-sm">
           <option value="">Select target party</option>
           <option v-for="target in customParties" :key="target.id" :value="target.id">
@@ -40,7 +43,7 @@
         </select>
         <span class="muted">Pick a custom party before copying templates.</span>
       </div>
-      <div v-else class="details-editor">
+      <div v-else-if="openedPartyIds[party.id]" class="details-editor">
         <div class="row wrap">
           <textarea
             v-model="partyImportJson[party.id]"
@@ -53,7 +56,7 @@
         </div>
       </div>
 
-      <div class="card-list">
+      <div v-if="openedPartyIds[party.id]" class="card-list">
         <article
           v-for="member in libraryStore.getPartyMembers(party.id)"
           :key="member.id"
@@ -124,6 +127,7 @@ const newPartyName = ref("");
 const partyTargets = reactive<Record<string, string>>({});
 const editingMemberIds = reactive<Record<string, boolean>>({});
 const partyImportJson = reactive<Record<string, string>>({});
+const openedPartyIds = reactive<Record<string, boolean>>({});
 
 const customParties = computed(() =>
   libraryStore.orderedParties.filter((party) => party.scope === "custom")
@@ -139,7 +143,8 @@ const editableCombatants = computed<Record<string, Combatant>>(() =>
 );
 
 async function createParty() {
-  await libraryStore.createParty(newPartyName.value);
+  const partyId = await libraryStore.createParty(newPartyName.value);
+  openedPartyIds[partyId] = true;
   newPartyName.value = "";
 }
 
@@ -197,6 +202,10 @@ async function importIntoParty(partyId: string) {
 
 function toggleEditing(memberId: string) {
   editingMemberIds[memberId] = !editingMemberIds[memberId];
+}
+
+function togglePartyOpen(partyId: string) {
+  openedPartyIds[partyId] = !openedPartyIds[partyId];
 }
 
 async function copyMemberJson(memberId: string) {

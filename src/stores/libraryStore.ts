@@ -39,16 +39,18 @@ export const useLibraryStore = defineStore("library", () => {
 
   const orderedParties = computed(() =>
     [...parties.value].sort((a, b) => {
+      if (a.scope !== b.scope) return a.scope === "custom" ? -1 : 1;
+      if (a.scope === "custom" && b.scope === "custom") return b.createdAt - a.createdAt;
       if (a.isDefault !== b.isDefault) return a.isDefault ? -1 : 1;
-      if (a.scope !== b.scope) return a.scope === "system" ? -1 : 1;
-      return a.name.localeCompare(b.name);
+      return b.updatedAt - a.updatedAt;
     })
   );
 
   const orderedCollections = computed(() =>
     [...bestiaryCollections.value].sort((a, b) => {
-      if (a.scope !== b.scope) return a.scope === "system" ? -1 : 1;
-      return a.name.localeCompare(b.name);
+      if (a.scope !== b.scope) return a.scope === "custom" ? -1 : 1;
+      if (a.scope === "custom" && b.scope === "custom") return b.createdAt - a.createdAt;
+      return b.updatedAt - a.updatedAt;
     })
   );
 

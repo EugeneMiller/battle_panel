@@ -26,31 +26,37 @@ function asRoot(raw: string): PortableRoot {
   return parsed;
 }
 
+function clonePortable<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
 export function parsePortableCombatants(raw: string): CombatantBlueprint[] {
   const root = asRoot(raw);
 
   if (root.kind === "combatant_blueprint" && isCombatantBlueprint(root.combatant)) {
-    return [root.combatant];
+    return [clonePortable(root.combatant)];
   }
 
   if (root.kind === "party" && Array.isArray(root.members)) {
     const members = root.members as PartyMemberTemplate[];
     return members
       .map((member) => member.blueprint)
-      .filter((blueprint): blueprint is CombatantBlueprint => isCombatantBlueprint(blueprint));
+      .filter((blueprint): blueprint is CombatantBlueprint => isCombatantBlueprint(blueprint))
+      .map((blueprint) => clonePortable(blueprint));
   }
 
   if (root.kind === "bestiary_collection" && Array.isArray(root.entries)) {
     const entries = root.entries as BestiaryEntry[];
     return entries
       .map((entry) => entry.blueprint)
-      .filter((blueprint): blueprint is CombatantBlueprint => isCombatantBlueprint(blueprint));
+      .filter((blueprint): blueprint is CombatantBlueprint => isCombatantBlueprint(blueprint))
+      .map((blueprint) => clonePortable(blueprint));
   }
 
   const candidate =
-    root.kind === "combatant" && isRecord(root.combatant)
+    (root.kind === "combatant" || root.kind === "combatant_blueprint") && isRecord(root.combatant)
       ? (root.combatant as PortableRoot)
       : root;
   if (!isCombatantBlueprint(candidate)) throw new Error("Invalid combatant JSON");
-  return [candidate as unknown as Partial<Combatant> as CombatantBlueprint];
+  return [clonePortable(candidate as unknown as Partial<Combatant> as CombatantBlueprint)];
 }

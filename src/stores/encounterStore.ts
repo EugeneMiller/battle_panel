@@ -102,7 +102,7 @@ export const useEncounterStore = defineStore("encounter", () => {
 
   async function persistEncounter(encounter: Encounter) {
     encounter.updatedAt = now();
-    await db.encounters.put(encounter);
+    await db.encounters.put(clone(encounter));
   }
 
   async function persistCombatant(combatant: Combatant) {
@@ -111,7 +111,7 @@ export const useEncounterStore = defineStore("encounter", () => {
     const encounter = getEncounterById(normalized.encounterId);
     if (encounter) {
       encounter.updatedAt = now();
-      await db.encounters.put(encounter);
+      await db.encounters.put(clone(encounter));
     }
   }
 

@@ -20,6 +20,9 @@
           </div>
         </div>
         <div class="row wrap">
+          <button class="btn" @click="toggleCollectionOpen(collection.id)">
+            {{ openedCollectionIds[collection.id] ? "Collapse" : "Expand" }}
+          </button>
           <button class="btn" @click="copyCollectionJson(collection.id)">Copy library JSON</button>
           <button
             v-if="collection.scope === 'custom'"
@@ -38,7 +41,7 @@
         </div>
       </div>
 
-      <div v-if="collection.scope === 'system'" class="row wrap">
+      <div v-if="openedCollectionIds[collection.id] && collection.scope === 'system'" class="row wrap">
         <select v-model="collectionTargets[collection.id]" class="input-sm">
           <option value="">Select target library</option>
           <option v-for="target in customCollections" :key="target.id" :value="target.id">
@@ -48,7 +51,7 @@
         <span class="muted">Choose a custom library before copying a system NPC.</span>
       </div>
 
-      <div class="card-list">
+      <div v-if="openedCollectionIds[collection.id]" class="card-list">
         <article
           v-for="entry in libraryStore.getCollectionEntries(collection.id)"
           :key="entry.id"
@@ -91,10 +94,10 @@
             <span v-if="entry.blueprint.speed"> - {{ entry.blueprint.speed }}</span>
           </div>
 
-          <LibraryCombatantEditor
+          <PartyMemberEditor
             v-if="collection.scope === 'custom' && editingEntryIds[entry.id]"
-            :model="entry.blueprint"
-            @update="updateEntry(entry.id, $event)"
+            :combatant="editableEntries[entry.id]"
+            @update="updateEntryCombatant(entry.id, $event)"
           />
         </article>
       </div>
@@ -104,22 +107,34 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
-import LibraryCombatantEditor from "../components/LibraryCombatantEditor.vue";
+import PartyMemberEditor from "../components/PartyMemberEditor.vue";
 import { useLibraryStore } from "../stores/libraryStore";
-import type { CombatantBlueprint } from "../models/types";
+import type { Combatant } from "../models/types";
 import { copyText } from "../utils/clipboard";
+import { blueprintToEditableCombatant, combatantToBlueprint } from "../utils/combatantBlueprints";
 
 const libraryStore = useLibraryStore();
 const newCollectionName = ref("");
 const collectionTargets = reactive<Record<string, string>>({});
 const editingEntryIds = reactive<Record<string, boolean>>({});
+const openedCollectionIds = reactive<Record<string, boolean>>({});
 
 const customCollections = computed(() =>
   libraryStore.orderedCollections.filter((collection) => collection.scope === "custom")
 );
 
+const editableEntries = computed<Record<string, Combatant>>(() =>
+  Object.fromEntries(
+    libraryStore.bestiaryEntries.map((entry) => [
+      entry.id,
+      blueprintToEditableCombatant(entry.id, entry.blueprint)
+    ])
+  )
+);
+
 async function createCollection() {
-  await libraryStore.createBestiaryCollection(newCollectionName.value);
+  const collectionId = await libraryStore.createBestiaryCollection(newCollectionName.value);
+  openedCollectionIds[collectionId] = true;
   newCollectionName.value = "";
 }
 
@@ -151,10 +166,13 @@ async function copyEntryToCollection(entryId: string, collectionId?: string) {
   await libraryStore.copyBestiaryEntry(entryId, collectionId, entryName);
 }
 
-async function updateEntry(entryId: string, blueprint: CombatantBlueprint) {
+async function updateEntryCombatant(entryId: string, patch: Partial<Combatant>) {
+  const base = editableEntries.value[entryId];
+  if (!base) return;
+  const merged: Combatant = { ...base, ...patch };
   await libraryStore.updateBestiaryEntry(entryId, {
-    name: blueprint.name,
-    blueprint
+    name: merged.name,
+    blueprint: combatantToBlueprint(merged)
   });
 }
 
@@ -170,6 +188,10 @@ async function removeCollection(collectionId: string) {
 
 function toggleEditing(entryId: string) {
   editingEntryIds[entryId] = !editingEntryIds[entryId];
+}
+
+function toggleCollectionOpen(collectionId: string) {
+  openedCollectionIds[collectionId] = !openedCollectionIds[collectionId];
 }
 
 async function copyEntryJson(entryId: string) {

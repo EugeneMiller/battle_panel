@@ -152,13 +152,21 @@ async function importCombatantFromJson() {
   if (!encounter.value) return;
   const text = combatantJsonText.value.trim();
   if (!text) return;
+  let blueprints;
   try {
-    const blueprints = parsePortableCombatants(text);
+    blueprints = parsePortableCombatants(text);
+  } catch {
+    window.alert("Invalid combatant JSON format");
+    return;
+  }
+
+  try {
     for (const blueprint of blueprints) {
       await store.addCombatant(encounter.value.id, blueprintToCombatantInput(blueprint));
     }
-  } catch {
-    window.alert("Invalid combatant JSON");
+  } catch (error) {
+    console.error(error);
+    window.alert("Combatant JSON was parsed, but adding it to the encounter failed.");
     return;
   }
   combatantJsonText.value = "";
